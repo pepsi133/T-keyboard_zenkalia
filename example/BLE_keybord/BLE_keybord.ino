@@ -34,6 +34,7 @@ uint16_t flow_i = 0;
 bool keyborad_BL_state = true;
 bool display_connected = true;  //The bluetooth connection is displayed on the screen
 bool case_locking = false;
+bool sym_active = false;
 bool alt_active = false;
 unsigned long previousMillis_1 = 0; //Millisecond time record
 unsigned long previousMillis_2 = 0; //Millisecond time record
@@ -179,19 +180,37 @@ void setup()
 
 void loop()
 {
-    if (alt_active && keyPressed(3, 4)) {//alt+b   Change keyboard backlight status
-        alt_active = false;
+    alt_active = keyActive(0, 4);
+    sym_active = keyActive(0, 2);
+
+    if (sym_active && keyPressed(3, 4)) {//sym+b   Change keyboard backlight status
         TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
         keyborad_BL_state = !keyborad_BL_state;
         set_keyborad_BL(keyborad_BL_state);
         clear_sccreen();
     }
 
-    if (keyActive(0, 4) && keyPressed(2, 3)) {  //Alt + Right Shit, Toggle case locking
+    if (alt_active && keyPressed(2, 3)) {  //Alt + Right Shit, Toggle case locking
         case_locking = !case_locking;
     }
 
     if (bleKeyboard.isConnected()) {
+        if (sym_active && keyPressed(0, 1)) { // W
+            bleKeyboard.press(KEY_UP_ARROW);
+        }
+
+        if (sym_active && keyPressed(0,3)) { // A
+            bleKeyboard.press(KEY_LEFT_ARROW);
+        }
+
+        if (sym_active && keyPressed(1,1)) { // S
+            bleKeyboard.press(KEY_DOWN_ARROW);
+        }
+
+        if (sym_active && keyPressed(1,2)) { // D
+            bleKeyboard.press(KEY_RIGHT_ARROW);
+        }
+
         if (millis() - previousMillis_1  > backlight_off_time) {//No keyboard for 20 seconds. Turn off the screen backlight
             TFT_099.backlight(0);
             previousMillis_1 = millis();;
@@ -223,10 +242,7 @@ void loop()
             TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
             bleKeyboard.press(KEY_BACKSPACE);
         }
-        //SHIFT
-        if (keyPressed(1, 6)) {
-            bleKeyboard.press(KEY_RIGHT_SHIFT);
-        }
+
         //alt+left shit, trigger ctrl+shift(Switch the input method)
         if (keyActive(0, 4) && keyPressed(1, 6)) {
             bleKeyboard.press(KEY_RIGHT_CTRL);
@@ -260,8 +276,6 @@ void clear_sccreen()
 
 void readMatrix()
 {
-
-
     int delayTime = 0;
     // iterate the columns
     for (int colIndex = 0; colIndex < colCount; colIndex++) {
@@ -292,11 +306,6 @@ void readMatrix()
         pinMode(curCol, INPUT);
     }
 
-    if (keyPressed(0, 2)) {
-        symbolSelected = true;
-        // symbolSelected = !symbolSelected;
-    }
-
 }
 
 bool keyPressed(int colIndex, int rowIndex)
@@ -324,28 +333,25 @@ void printMatrix()
             if (keyPressed(colIndex, rowIndex) && isPrintableKey(colIndex, rowIndex)) {
 
                 String toPrint;
-                if (symbolSelected) {
-                    symbolSelected = false;
+                if (alt_active) {
                     toPrint = String(keyboard_symbol[colIndex][rowIndex]);
-                } else {
+                } else if (!sym_active) {
                     toPrint = String(keyboard[colIndex][rowIndex]);
                 }
 
-                if (keyActive(0, 4)) {
-                    alt_active = true;
-                    keys[0][4] = false;
-                    return;
-                }
                 // keys 1,6 and 2,3 are Shift keys, so we want to upper case
                 if (case_locking || keyActive(1, 6) || keyActive(2, 3)) { // Left or right shift
                     toPrint.toUpperCase();
                 }
 
+<<<<<<< HEAD
                 if (OffsetX >= TFT_WIDE) {
                     OffsetX = 0;
                     TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
                 }
 
+=======
+>>>>>>> 498325b (use alt for alternative characters and sym for special functions. also adds one special function: WASD arrow keys.)
                 TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
                 char c[2];
                 strcpy(c, toPrint.c_str());
