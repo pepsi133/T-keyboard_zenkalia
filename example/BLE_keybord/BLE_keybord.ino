@@ -344,14 +344,11 @@ void printMatrix()
                     toPrint.toUpperCase();
                 }
 
-<<<<<<< HEAD
                 if (OffsetX >= TFT_WIDE) {
                     OffsetX = 0;
                     TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
                 }
 
-=======
->>>>>>> 498325b (use alt for alternative characters and sym for special functions. also adds one special function: WASD arrow keys.)
                 TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
                 char c[2];
                 strcpy(c, toPrint.c_str());
