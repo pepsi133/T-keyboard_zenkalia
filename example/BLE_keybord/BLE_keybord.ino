@@ -25,7 +25,7 @@ bool lastValue[colCount][rowCount];
 bool changedValue[colCount][rowCount];
 
 char keyboard[colCount][rowCount];
-char keyboard_symbol[colCount][rowCount];
+char keyboard_alt[colCount][rowCount];
 
 
 bool symbolSelected;
@@ -93,45 +93,45 @@ void setup()
     keyboard[4][5] = 'm';
     keyboard[4][6] = 'k';
 
-    keyboard_symbol[0][0] = '#';
-    keyboard_symbol[0][1] = '1';
-    keyboard_symbol[0][2] = NULL;
-    keyboard_symbol[0][3] = '*';
-    keyboard_symbol[0][4] = NULL;
-    keyboard_symbol[0][5] = NULL;
-    keyboard_symbol[0][6] = '0';
+    keyboard_alt[0][0] = '#';
+    keyboard_alt[0][1] = '1';
+    keyboard_alt[0][2] = NULL;
+    keyboard_alt[0][3] = '*';
+    keyboard_alt[0][4] = NULL;
+    keyboard_alt[0][5] = NULL;
+    keyboard_alt[0][6] = '0';
 
-    keyboard_symbol[1][0] = '2';
-    keyboard_symbol[1][1] = '4';
-    keyboard_symbol[1][2] = '5';
-    keyboard_symbol[1][3] = '@';
-    keyboard_symbol[1][4] = '8';
-    keyboard_symbol[1][5] = '7';
-    keyboard_symbol[1][6] = NULL;
+    keyboard_alt[1][0] = '2';
+    keyboard_alt[1][1] = '4';
+    keyboard_alt[1][2] = '5';
+    keyboard_alt[1][3] = '@';
+    keyboard_alt[1][4] = '8';
+    keyboard_alt[1][5] = '7';
+    keyboard_alt[1][6] = NULL;
 
-    keyboard_symbol[2][0] = '3';
-    keyboard_symbol[2][1] = '/';
-    keyboard_symbol[2][2] = '(';
-    keyboard_symbol[2][3] = NULL;
-    keyboard_symbol[2][4] = '?';
-    keyboard_symbol[2][5] = '9';
-    keyboard_symbol[2][6] = '6';
+    keyboard_alt[2][0] = '3';
+    keyboard_alt[2][1] = '/';
+    keyboard_alt[2][2] = '(';
+    keyboard_alt[2][3] = NULL;
+    keyboard_alt[2][4] = '?';
+    keyboard_alt[2][5] = '9';
+    keyboard_alt[2][6] = '6';
 
-    keyboard_symbol[3][0] = '_';
-    keyboard_symbol[3][1] = ':';
-    keyboard_symbol[3][2] = ')';
-    keyboard_symbol[3][3] = NULL;
-    keyboard_symbol[3][4] = '!';
-    keyboard_symbol[3][5] = ',';
-    keyboard_symbol[3][6] = ';';
+    keyboard_alt[3][0] = '_';
+    keyboard_alt[3][1] = ':';
+    keyboard_alt[3][2] = ')';
+    keyboard_alt[3][3] = NULL;
+    keyboard_alt[3][4] = '!';
+    keyboard_alt[3][5] = ',';
+    keyboard_alt[3][6] = ';';
 
-    keyboard_symbol[4][0] = '+';
-    keyboard_symbol[4][1] = '"';
-    keyboard_symbol[4][2] = '-';
-    keyboard_symbol[4][3] = NULL;
-    keyboard_symbol[4][4] = NULL;
-    keyboard_symbol[4][5] = '.';
-    keyboard_symbol[4][6] = '\'';
+    keyboard_alt[4][0] = '+';
+    keyboard_alt[4][1] = '"';
+    keyboard_alt[4][2] = '-';
+    keyboard_alt[4][3] = NULL;
+    keyboard_alt[4][4] = NULL;
+    keyboard_alt[4][5] = '.';
+    keyboard_alt[4][6] = '\'';
 
     delay(500);
     pinMode(keyborad_BL_PIN, OUTPUT);
@@ -319,7 +319,7 @@ bool keyActive(int colIndex, int rowIndex)
 
 bool isPrintableKey(int colIndex, int rowIndex)
 {
-    return keyboard_symbol[colIndex][rowIndex] != NULL || keyboard[colIndex][rowIndex] != NULL;
+    return keyboard_alt[colIndex][rowIndex] != NULL || keyboard[colIndex][rowIndex] != NULL;
 }
 
 
@@ -333,7 +333,7 @@ void printMatrix()
 
                 String toPrint;
                 if (alt_active) {
-                    toPrint = String(keyboard_symbol[colIndex][rowIndex]);
+                    toPrint = String(keyboard_alt[colIndex][rowIndex]);
                 } else if (!sym_active) {
                     toPrint = String(keyboard[colIndex][rowIndex]);
                 }
