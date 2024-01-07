@@ -184,10 +184,8 @@ void loop()
     sym_active = keyActive(0, 2);
 
     if (sym_active && keyPressed(3, 4)) {//sym+b   Change keyboard backlight status
-        TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
         keyborad_BL_state = !keyborad_BL_state;
         set_keyborad_BL(keyborad_BL_state);
-        clear_sccreen();
     }
 
     if (alt_active && keyPressed(2, 3)) {  //Alt + Right Shit, Toggle case locking
@@ -244,6 +242,7 @@ void loop()
         }
 
         //alt+left shit, trigger ctrl+shift(Switch the input method)
+        //what does this do? is this a windows shortcut?
         if (keyActive(0, 4) && keyPressed(1, 6)) {
             bleKeyboard.press(KEY_RIGHT_CTRL);
             bleKeyboard.press(KEY_RIGHT_SHIFT);
@@ -339,28 +338,29 @@ void printMatrix()
                     toPrint = String(keyboard[colIndex][rowIndex]);
                 }
 
-                // keys 1,6 and 2,3 are Shift keys, so we want to upper case
-                if (case_locking || keyActive(1, 6) || keyActive(2, 3)) { // Left or right shift
-                    toPrint.toUpperCase();
+                if (!toPrint.isEmpty()) {
+                    // keys 1,6 and 2,3 are Shift keys, so we want to upper case
+                    if (case_locking || keyActive(1, 6) || keyActive(2, 3)) { // Left or right shift
+                        toPrint.toUpperCase();
+                    }
+
+                    if (OffsetX >= TFT_WIDE) {
+                        OffsetX = 0;
+                        TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
+                    }
+
+                    TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
+                    char c[2];
+                    strcpy(c, toPrint.c_str());
+                    TFT_099.DispStr(c, OffsetX, 2, WHITE, BLACK);
+                    Serial.println(c);
+                    Serial.print(toPrint);
+                    bleKeyboard.print(toPrint);
+                    OffsetX = OffsetX + GAP;
+
+                    TFT_099.backlight(50);
+                    previousMillis_1 = millis();
                 }
-
-                if (OffsetX >= TFT_WIDE) {
-                    OffsetX = 0;
-                    TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
-                }
-
-                TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
-                char c[2];
-                strcpy(c, toPrint.c_str());
-                TFT_099.DispStr(c, OffsetX, 2, WHITE, BLACK);
-                Serial.println(c);
-                Serial.print(toPrint);
-                bleKeyboard.print(toPrint);
-                OffsetX = OffsetX + GAP;
-
-                TFT_099.backlight(50);
-                previousMillis_1 = millis();
-
             }
         }
     }
