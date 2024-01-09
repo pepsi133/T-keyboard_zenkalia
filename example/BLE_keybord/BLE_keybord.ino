@@ -27,7 +27,7 @@ bool changedValue[colCount][rowCount];
 char keyboard[colCount][rowCount];
 char keyboard_alt[colCount][rowCount];
 
-
+bool firstChar = true;
 bool symbolSelected;
 int OffsetX = 0;
 uint16_t flow_i = 0;
@@ -47,7 +47,7 @@ bool keyActive(int colIndex, int rowIndex);
 bool isPrintableKey(int colIndex, int rowIndex);
 void printMatrix();
 void set_keyborad_BL(bool state);
-void clear_sccreen();
+void clear_screen();
 
 void setup()
 {
@@ -154,26 +154,8 @@ void setup()
 
     TFT_099.begin();
     TFT_099.backlight(50);
-    TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
-    TFT_099.DrawImage(0, 0, 40, 160, liligo_logo);
-    delay(2000);
 
-    //Flow of the logo
-    while (millis() < 6000) {
-        for (int j = 0; j < 4; j++) {
-            TFT_099.DrawImage(0, (160 - (flow_i + j * 55)), 40, 40, liligo_logo1);
-        }
-        flow_i++;
-        if (flow_i == 55) {
-            flow_i = 0;
-        }
-    }
-
-        TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
-    TFT_099.DispStr("version 1.0.0", 0, 2, WHITE, BLACK);
-    delay(3000);
-
-    TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
+    clear_screen();
     TFT_099.DispStr("Wait bluetooth ......", 0, 2, WHITE, BLACK);
 }
 
@@ -225,7 +207,7 @@ void loop()
 
         // key 3,3 is the enter key
         if (keyPressed(3, 3)) {
-            clear_sccreen();
+            clear_screen();
             Serial.println();
             bleKeyboard.println();
         }
@@ -237,7 +219,7 @@ void loop()
                 OffsetX = OffsetX - GAP;
             }
 
-            TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
+            TFT_099.DispColor(0, OffsetX, 20, OffsetX + GAP, BLACK);
             bleKeyboard.press(KEY_BACKSPACE);
         }
 
@@ -252,7 +234,7 @@ void loop()
 
     } else {
         if (millis() - previousMillis_2 > display_Wait_blue_time ) {
-            TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
+            clear_screen();
             TFT_099.DispStr("Wait bluetooth ......", 0, 2, WHITE, BLACK);
             display_connected = true;
             previousMillis_2 = millis();
@@ -267,9 +249,8 @@ void set_keyborad_BL(bool state)
     digitalWrite(keyborad_BL_PIN, state);
 }
 
-void clear_sccreen()
+void clear_screen()
 {
-    OffsetX = 0;
     TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
 }
 
@@ -322,7 +303,6 @@ bool isPrintableKey(int colIndex, int rowIndex)
     return keyboard_alt[colIndex][rowIndex] != NULL || keyboard[colIndex][rowIndex] != NULL;
 }
 
-
 void printMatrix()
 {
 
@@ -339,6 +319,11 @@ void printMatrix()
                 }
 
                 if (!toPrint.isEmpty()) {
+                    if (firstChar) {
+                        firstChar = false;
+                        clear_screen();
+                    }
+
                     // keys 1,6 and 2,3 are Shift keys, so we want to upper case
                     if (case_locking || keyActive(1, 6) || keyActive(2, 3)) { // Left or right shift
                         toPrint.toUpperCase();
@@ -346,10 +331,10 @@ void printMatrix()
 
                     if (OffsetX >= TFT_WIDE) {
                         OffsetX = 0;
-                        TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
+                        clear_screen();
                     }
 
-                    TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
+                    // TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
                     char c[2];
                     strcpy(c, toPrint.c_str());
                     TFT_099.DispStr(c, OffsetX, 2, WHITE, BLACK);
