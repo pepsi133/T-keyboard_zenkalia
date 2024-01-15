@@ -233,13 +233,6 @@ void loop()
             bleKeyboard.press(KEY_BACKSPACE);
         }
 
-        //alt+left shit, trigger ctrl+shift(Switch the input method)
-        //what does this do? is this a windows shortcut?
-        if (keyActive(0, 4) && keyPressed(1, 6)) {
-            bleKeyboard.press(KEY_RIGHT_CTRL);
-            bleKeyboard.press(KEY_RIGHT_SHIFT);
-        }
-
         bleKeyboard.releaseAll();
 
     } else {
