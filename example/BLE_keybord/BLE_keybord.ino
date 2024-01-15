@@ -28,6 +28,7 @@ char keyboard[colCount][rowCount];
 char keyboard_alt[colCount][rowCount];
 
 bool firstChar = true;
+bool statusMsg = false;
 bool symbolSelected;
 int OffsetX = 0;
 uint16_t flow_i = 0;
@@ -174,6 +175,12 @@ void loop()
 
     if (alt_active && keyPressed(2, 3)) {  //Alt + Right Shit, Toggle case locking
         case_locking = !case_locking;
+        if (case_locking) {
+            TFT_099.DispStr("Caps ON", 0, 22, GRAY75, BLACK);
+        } else {
+            TFT_099.DispStr("Caps off", 0, 22, GRAY75, BLACK);
+        }
+        statusMsg = true;
     }
 
     if (bleKeyboard.isConnected()) {
@@ -222,7 +229,7 @@ void loop()
                 OffsetX = OffsetX - GAP;
             }
 
-            TFT_099.DispColor(0, OffsetX, 20, OffsetX + GAP, BLACK);
+            TFT_099.DispStr(" ", OffsetX, 2, GRAY, BLACK);
             bleKeyboard.press(KEY_BACKSPACE);
         }
 
@@ -325,6 +332,11 @@ void printMatrix()
                     if (firstChar) {
                         firstChar = false;
                         clear_screen();
+                    }
+
+                    if (statusMsg) {
+                        statusMsg = false;
+                        TFT_099.DispStr("          ", 0, 22, GRAY, BLACK);
                     }
 
                     // keys 1,6 and 2,3 are Shift keys, so we want to upper case
