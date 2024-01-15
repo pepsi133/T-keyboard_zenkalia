@@ -157,6 +157,8 @@ void setup()
 
     clear_screen();
     TFT_099.DispStr("Wait bluetooth ......", 0, 2, WHITE, BLACK);
+    TFT_099.DispStr("Bleeding Edge!", 0, 22, RED, BLACK);
+
 }
 
 
