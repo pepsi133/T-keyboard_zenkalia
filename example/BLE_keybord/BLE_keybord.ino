@@ -207,6 +207,7 @@ void loop()
 
         // key 3,3 is the enter key
         if (keyPressed(3, 3)) {
+            OffsetX = 0;
             clear_screen();
             Serial.println();
             bleKeyboard.println();
