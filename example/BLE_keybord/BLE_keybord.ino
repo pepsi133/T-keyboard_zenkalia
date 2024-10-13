@@ -173,7 +173,7 @@ void loop()
         set_keyborad_BL(keyborad_BL_state);
     }
 
-    if (alt_active && keyPressed(2, 3)) {  //Alt + Right Shit, Toggle case locking
+    if (keyActive(0, 4) && keyPressed(2, 3)) {  //Alt + Right Shit, Toggle case locking
         case_locking = !case_locking;
         if (case_locking) {
             TFT_099.DispStr("Caps ON", 0, 22, GRAY75, BLACK);
@@ -321,38 +321,28 @@ void printMatrix()
                     toPrint = String(keyboard[colIndex][rowIndex]);
                 }
 
-                if (!toPrint.isEmpty()) {
-                    if (firstChar) {
-                        firstChar = false;
-                        clear_screen();
-                    }
+                if (keyActive(0, 4)) {
+                    alt_active = true;
+                    keys[0][4] = false;
+                    return;
+                }
+                // keys 1,6 and 2,3 are Shift keys, so we want to upper case
+                if (case_locking || keyActive(1, 6) || keyActive(2, 3)) { // Left or right shift
+                    toPrint.toUpperCase();
+                }
 
-                    if (statusMsg) {
-                        statusMsg = false;
-                        TFT_099.DispStr("          ", 0, 22, GRAY, BLACK);
-                    }
 
-                    // keys 1,6 and 2,3 are Shift keys, so we want to upper case
-                    if (case_locking || keyActive(1, 6) || keyActive(2, 3)) { // Left or right shift
-                        toPrint.toUpperCase();
-                    }
-
-                    if (OffsetX >= TFT_WIDE) {
-                        OffsetX = 0;
-                        clear_screen();
-                    }
-
-                    // TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
-                    char c[2];
-                    strcpy(c, toPrint.c_str());
-                    TFT_099.DispStr(c, OffsetX, 2, WHITE, BLACK);
-                    Serial.println(c);
-                    Serial.print(toPrint);
-                    bleKeyboard.print(toPrint);
-                    OffsetX = OffsetX + GAP;
-
-                    TFT_099.backlight(50);
-                    previousMillis_1 = millis();
+                TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
+                char c[2];
+                strcpy(c, toPrint.c_str());
+                TFT_099.DispStr(c, OffsetX, 2, WHITE, BLACK);
+                Serial.println(c);
+                Serial.print(toPrint);
+                bleKeyboard.print(toPrint);
+                OffsetX = OffsetX + GAP;
+                if (OffsetX > 160) {
+                    OffsetX = 0;
+                    TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
                 }
             }
         }

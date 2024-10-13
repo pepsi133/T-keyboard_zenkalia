@@ -9,7 +9,8 @@
 |      Shift     |                                    Shift                                     |
 | alt+Right shift|                             Toggle case locking                              |
 |      sym       |        Enter numbers and characters (only triggered once, not locked)        |
-|     alt+b      |                       Change keyboard backlight status                       |
+| alt+left shift |                     ctrl+shift(Switch the input method)                      |
+
 
 
 
