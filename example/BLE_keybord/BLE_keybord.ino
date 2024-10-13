@@ -25,15 +25,17 @@ bool lastValue[colCount][rowCount];
 bool changedValue[colCount][rowCount];
 
 char keyboard[colCount][rowCount];
-char keyboard_symbol[colCount][rowCount];
+char keyboard_alt[colCount][rowCount];
 
-
+bool firstChar = true;
+bool statusMsg = false;
 bool symbolSelected;
 int OffsetX = 0;
 uint16_t flow_i = 0;
 bool keyborad_BL_state = true;
 bool display_connected = true;  //The bluetooth connection is displayed on the screen
 bool case_locking = false;
+bool sym_active = false;
 bool alt_active = false;
 unsigned long previousMillis_1 = 0; //Millisecond time record
 unsigned long previousMillis_2 = 0; //Millisecond time record
@@ -46,7 +48,7 @@ bool keyActive(int colIndex, int rowIndex);
 bool isPrintableKey(int colIndex, int rowIndex);
 void printMatrix();
 void set_keyborad_BL(bool state);
-void clear_sccreen();
+void clear_screen();
 
 void setup()
 {
@@ -92,45 +94,45 @@ void setup()
     keyboard[4][5] = 'm';
     keyboard[4][6] = 'k';
 
-    keyboard_symbol[0][0] = '#';
-    keyboard_symbol[0][1] = '1';
-    keyboard_symbol[0][2] = NULL;
-    keyboard_symbol[0][3] = '*';
-    keyboard_symbol[0][4] = NULL;
-    keyboard_symbol[0][5] = NULL;
-    keyboard_symbol[0][6] = '0';
+    keyboard_alt[0][0] = '#';
+    keyboard_alt[0][1] = '1';
+    keyboard_alt[0][2] = NULL;
+    keyboard_alt[0][3] = '*';
+    keyboard_alt[0][4] = NULL;
+    keyboard_alt[0][5] = NULL;
+    keyboard_alt[0][6] = '0';
 
-    keyboard_symbol[1][0] = '2';
-    keyboard_symbol[1][1] = '4';
-    keyboard_symbol[1][2] = '5';
-    keyboard_symbol[1][3] = '@';
-    keyboard_symbol[1][4] = '8';
-    keyboard_symbol[1][5] = '7';
-    keyboard_symbol[1][6] = NULL;
+    keyboard_alt[1][0] = '2';
+    keyboard_alt[1][1] = '4';
+    keyboard_alt[1][2] = '5';
+    keyboard_alt[1][3] = '@';
+    keyboard_alt[1][4] = '8';
+    keyboard_alt[1][5] = '7';
+    keyboard_alt[1][6] = NULL;
 
-    keyboard_symbol[2][0] = '3';
-    keyboard_symbol[2][1] = '/';
-    keyboard_symbol[2][2] = '(';
-    keyboard_symbol[2][3] = NULL;
-    keyboard_symbol[2][4] = '?';
-    keyboard_symbol[2][5] = '9';
-    keyboard_symbol[2][6] = '6';
+    keyboard_alt[2][0] = '3';
+    keyboard_alt[2][1] = '/';
+    keyboard_alt[2][2] = '(';
+    keyboard_alt[2][3] = NULL;
+    keyboard_alt[2][4] = '?';
+    keyboard_alt[2][5] = '9';
+    keyboard_alt[2][6] = '6';
 
-    keyboard_symbol[3][0] = '_';
-    keyboard_symbol[3][1] = ':';
-    keyboard_symbol[3][2] = ')';
-    keyboard_symbol[3][3] = NULL;
-    keyboard_symbol[3][4] = '!';
-    keyboard_symbol[3][5] = ',';
-    keyboard_symbol[3][6] = ';';
+    keyboard_alt[3][0] = '_';
+    keyboard_alt[3][1] = ':';
+    keyboard_alt[3][2] = ')';
+    keyboard_alt[3][3] = NULL;
+    keyboard_alt[3][4] = '!';
+    keyboard_alt[3][5] = ',';
+    keyboard_alt[3][6] = ';';
 
-    keyboard_symbol[4][0] = '+';
-    keyboard_symbol[4][1] = '"';
-    keyboard_symbol[4][2] = '-';
-    keyboard_symbol[4][3] = NULL;
-    keyboard_symbol[4][4] = NULL;
-    keyboard_symbol[4][5] = '.';
-    keyboard_symbol[4][6] = '\'';
+    keyboard_alt[4][0] = '+';
+    keyboard_alt[4][1] = '"';
+    keyboard_alt[4][2] = '-';
+    keyboard_alt[4][3] = NULL;
+    keyboard_alt[4][4] = NULL;
+    keyboard_alt[4][5] = '.';
+    keyboard_alt[4][6] = '\'';
 
     delay(500);
     pinMode(keyborad_BL_PIN, OUTPUT);
@@ -153,45 +155,51 @@ void setup()
 
     TFT_099.begin();
     TFT_099.backlight(50);
-    TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
-    TFT_099.DrawImage(0, 0, 40, 160, liligo_logo);
-    delay(2000);
 
-    //Flow of the logo
-    while (millis() < 6000) {
-        for (int j = 0; j < 4; j++) {
-            TFT_099.DrawImage(0, (160 - (flow_i + j * 55)), 40, 40, liligo_logo1);
-        }
-        flow_i++;
-        if (flow_i == 55) {
-            flow_i = 0;
-        }
-    }
-
-        TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
-    TFT_099.DispStr("version 1.0.0", 0, 2, WHITE, BLACK);
-    delay(3000);
-
-    TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
+    clear_screen();
     TFT_099.DispStr("Wait bluetooth ......", 0, 2, WHITE, BLACK);
+    TFT_099.DispStr("Bleeding Edge!", 0, 22, RED, BLACK);
+
 }
 
 
 void loop()
 {
-    if (alt_active && keyPressed(3, 4)) {//alt+b   Change keyboard backlight status
-        alt_active = false;
-        TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
+    alt_active = keyActive(0, 4);
+    sym_active = keyActive(0, 2);
+
+    if (sym_active && keyPressed(3, 4)) {//sym+b   Change keyboard backlight status
         keyborad_BL_state = !keyborad_BL_state;
         set_keyborad_BL(keyborad_BL_state);
-        clear_sccreen();
     }
 
     if (keyActive(0, 4) && keyPressed(2, 3)) {  //Alt + Right Shit, Toggle case locking
         case_locking = !case_locking;
+        if (case_locking) {
+            TFT_099.DispStr("Caps ON", 0, 22, GRAY75, BLACK);
+        } else {
+            TFT_099.DispStr("Caps off", 0, 22, GRAY75, BLACK);
+        }
+        statusMsg = true;
     }
 
     if (bleKeyboard.isConnected()) {
+        if (sym_active && keyPressed(0, 1)) { // W
+            bleKeyboard.press(KEY_UP_ARROW);
+        }
+
+        if (sym_active && keyPressed(0,3)) { // A
+            bleKeyboard.press(KEY_LEFT_ARROW);
+        }
+
+        if (sym_active && keyPressed(1,1)) { // S
+            bleKeyboard.press(KEY_DOWN_ARROW);
+        }
+
+        if (sym_active && keyPressed(1,2)) { // D
+            bleKeyboard.press(KEY_RIGHT_ARROW);
+        }
+
         if (millis() - previousMillis_1  > backlight_off_time) {//No keyboard for 20 seconds. Turn off the screen backlight
             TFT_099.backlight(0);
             previousMillis_1 = millis();;
@@ -208,7 +216,8 @@ void loop()
 
         // key 3,3 is the enter key
         if (keyPressed(3, 3)) {
-            clear_sccreen();
+            OffsetX = 0;
+            clear_screen();
             Serial.println();
             bleKeyboard.println();
         }
@@ -220,24 +229,15 @@ void loop()
                 OffsetX = OffsetX - GAP;
             }
 
-            TFT_099.DispColor(0, OffsetX, TFT_HIGH, TFT_WIDE, BLACK);
+            TFT_099.DispStr(" ", OffsetX, 2, GRAY, BLACK);
             bleKeyboard.press(KEY_BACKSPACE);
-        }
-        //SHIFT
-        if (keyPressed(1, 6)) {
-            bleKeyboard.press(KEY_RIGHT_SHIFT);
-        }
-        //alt+left shit, trigger ctrl+shift(Switch the input method)
-        if (keyActive(0, 4) && keyPressed(1, 6)) {
-            bleKeyboard.press(KEY_RIGHT_CTRL);
-            bleKeyboard.press(KEY_RIGHT_SHIFT);
         }
 
         bleKeyboard.releaseAll();
 
     } else {
         if (millis() - previousMillis_2 > display_Wait_blue_time ) {
-            TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
+            clear_screen();
             TFT_099.DispStr("Wait bluetooth ......", 0, 2, WHITE, BLACK);
             display_connected = true;
             previousMillis_2 = millis();
@@ -252,16 +252,13 @@ void set_keyborad_BL(bool state)
     digitalWrite(keyborad_BL_PIN, state);
 }
 
-void clear_sccreen()
+void clear_screen()
 {
-    OffsetX = 0;
     TFT_099.DispColor(0, 0, TFT_WIDTH, TFT_HEIGHT, BLACK);
 }
 
 void readMatrix()
 {
-
-
     int delayTime = 0;
     // iterate the columns
     for (int colIndex = 0; colIndex < colCount; colIndex++) {
@@ -292,11 +289,6 @@ void readMatrix()
         pinMode(curCol, INPUT);
     }
 
-    if (keyPressed(0, 2)) {
-        symbolSelected = true;
-        // symbolSelected = !symbolSelected;
-    }
-
 }
 
 bool keyPressed(int colIndex, int rowIndex)
@@ -311,9 +303,8 @@ bool keyActive(int colIndex, int rowIndex)
 
 bool isPrintableKey(int colIndex, int rowIndex)
 {
-    return keyboard_symbol[colIndex][rowIndex] != NULL || keyboard[colIndex][rowIndex] != NULL;
+    return keyboard_alt[colIndex][rowIndex] != NULL || keyboard[colIndex][rowIndex] != NULL;
 }
-
 
 void printMatrix()
 {
@@ -324,10 +315,9 @@ void printMatrix()
             if (keyPressed(colIndex, rowIndex) && isPrintableKey(colIndex, rowIndex)) {
 
                 String toPrint;
-                if (symbolSelected) {
-                    symbolSelected = false;
-                    toPrint = String(keyboard_symbol[colIndex][rowIndex]);
-                } else {
+                if (alt_active) {
+                    toPrint = String(keyboard_alt[colIndex][rowIndex]);
+                } else if (!sym_active) {
                     toPrint = String(keyboard[colIndex][rowIndex]);
                 }
 
@@ -353,11 +343,7 @@ void printMatrix()
                 if (OffsetX > 160) {
                     OffsetX = 0;
                     TFT_099.DispColor(0, 0, TFT_HIGH, TFT_WIDE, BLACK);
-
                 }
-                TFT_099.backlight(50);
-                previousMillis_1 = millis();
-
             }
         }
     }
